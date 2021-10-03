@@ -13,9 +13,9 @@
 Релиз - это пакет, содержащий ваш скомпилированный Erlang/Elixir код (например, [BEAM](https://en.wikipedia.org/wiki/BEAM_(Erlang_virtual_machine)) [байт-код] (https://ru.wikipedia.org/wiki/%D0%91%D0%B0%D0%B9%D1%82-%D0%BA%D0%BE%D0%B4)).
 Он также предоставляет любые скрипты, необходимые для запуска вашего приложения.
 
-> When you have written one or more applications, you might want to create a complete system with these applications and a subset of the Erlang/OTP applications. This is called a release. - [Erlang documentation](http://erlang.org/doc/design_principles/release_structure.html)
+После создания одного или нескольких приложений у Вас может возникнуть желание создать полноценный набор программного обеспечения, включающий эти приложения и набор других приложений Erlang/OTP. Это и называется релизом. - [Erlang documentation](http://erlang.org/doc/design_principles/release_structure.html)
 
-> Releases enable simplified deployment: they are self-contained, and provide everything needed to boot the release; they are easily administered via the provided shell script to open up a remote console, start/stop/restart the release, start in the background, send remote commands, and more. In addition, they are archivable artifacts, meaning you can restore an old release from its tarball at any point in the future (barring incompatibilities with the underlying OS or system libraries). The use of releases is also a prerequisite of performing hot upgrades and downgrades, one of the most powerful features of the Erlang VM. - [Distillery Documentation](https://hexdocs.pm/distillery/introduction/understanding_releases.html)
+Резилы дают возможность упрощенной доставки ПО: они не требуют никаких сторонних зависимостей и предоставляют всё необходимое для своего запуска. Ими легко управлять при помощи поставляемых вместе с ними шелл-скриптов: запуск удалённого терминала, пуск/останов/перезапуск релиза, запуск в фоновом режиме, отправление дистанционных команд и многое другое. Релизы это архивируемые артефакты сборки, что означает, что Вы, имея его исходный архив (tarball), можете восстановить старый релиз в любое время, если возникнут проблемы совместимости с ОС или системными библиотеками. Использование релизов открывает Вам доступ к одной из самых мощных особенностей Erlang VM: установка/откат обновления (апгрейд/даунгрейд) на горячую. - [Distillery Documentation](https://hexdocs.pm/distillery/introduction/understanding_releases.html) 
 
 Релиз будет содержать следующее:
 * папка /bin
@@ -30,8 +30,8 @@
 
 ### Начало работы/установка
 
-To add Distillery to your project, add it as a dependency to your `mix.exs` file.
-*Note* - if you are working on an umbrella app this should be in the mix.exs in the root of your project
+Для того, чтобы добавить менеджер релизов Distillery в ваш проект, укажите его в качестве зависимости в файле `mix.exs`.
+*Примечание* - если вы работаете с зонтичным проектор, то это должен быть файл mix.exs в корневом каталоге вашего проекта.
 
 ```elixir
 defp deps do
@@ -55,9 +55,9 @@ mix compile
 mix release.init
 ```
 
-Эта команда создаст директорию `rel` с файлами конфигурации в нем.
+Эта команда создаст директорию `rel` с файлами конфигурации в ней.
 
-Чтобы сгенерировать релиз в вашем терминале, запустите `mix release`
+Чтобы сгенерировать релиз в вашем терминале, запустите `mix release`.
 
 После того, как релиз будет собран, вы должны увидеть некоторые инструкции в своем терминале.
 
@@ -77,7 +77,7 @@ To start the release you have built, you can use one of the following tasks:
     # start in the background, must be stopped with the 'stop' command
     > _build/dev/rel/book_app/bin/book_app start
 
-If you started a release elsewhere, and wish to connect to it:
+Если это дистанционный релиз, и вы хотите к нему подключиться:
 
     # connects a local shell to the running node
     > _build/dev/rel/book_app/bin/book_app remote_console
@@ -85,21 +85,20 @@ If you started a release elsewhere, and wish to connect to it:
     # connects directly to the running node's console
     > _build/dev/rel/book_app/bin/book_app attach
 
-For a complete listing of commands and their use:
+Для получения полного перечня команд:
 
     > _build/dev/rel/book_app/bin/book_app help
 ```
 
-To run your application type the following in your terminal ` _build/dev/rel/MYAPP/bin/MYAPP foreground`
-In your case replace MYAPP with your project name.
-Now we're running the release build of our application!
-
+Для запуска приложения введите это в терминале: ` _build/dev/rel/MYAPP/bin/MYAPP foreground`
+Замените MYAPP на имя вашего проекта.
+Теперь мы работаем с релизной сборкой нашего приложения.
 
 ## Использование Distillery вместе с Phoenix
 
-If you are using distillery with Phoenix there are a few extra steps you need to follow before this will work.
+Если вы собираетесь использовать менеджер релизов Distillery вместе с фреймворком Phoenix, то для этого нужно выполнить несколько следующих шагов.
 
-Сперва, нам нужно отредактировать файл `config/prod.exs`.
+Сперва нам нужно отредактировать файл `config/prod.exs`.
 
 Измените следующие строки с этого:
 
@@ -122,28 +121,26 @@ config :book_app, BookAppWeb.Endpoint,
 ```
 
 Здесь мы выполнили несколько вещей:
-- `server` - boots up the Cowboy application http endpoint on application start
-- `root` - sets up the application root which is where static files are served
-- `version` - busts the application cache when the application version is hot upgraded.
-- `port` - changing the port to be set by an ENV variable allows us to pass in the port number when starting up the application.
-When we start up the app, we can supply the port by running `PORT=4001 _build/prod/rel/book_app/bin/book_app foreground`
+- `server` - при старте приложения мы запускаем приложение Cowboy, которое обрабатывает http endpoint;
+- `root` - задаёт корневой каталог приложения, в котором хранятся все статические файлы;
+- `version` - принудительно обновляет кеш приложения при горячем обновлении версии приложения;
+- `port` - установка порта через переменную окружения позволяет нам передавать номер порта при запуске приложения;
+Например, мы можем задать порт, запуская `PORT=4001 _build/prod/rel/book_app/bin/book_app foreground`
 
-If you executed the above command, you might have noticed that your application crashed because it is unable to connect to the database since no database currently exists.
-This can be rectified by running an Ecto `mix` command.
-In your terminal, type the following:
+Если вы выполнили приведенную выше команду, то вы могли заметить, что приложение прекратило работу, потому что оно неспособно соединиться с базой данных, так как никакой базы данных ещё не существует. Это может быть исправлено запуском команды `mix`.
+В терминале введите следующее:
 
 ```shell
 MIX_ENV=prod mix ecto.create
 ```
 
-This command will create your database for you.
-Try re-running the application and it should start up successfully.
-However, you will notice that your migrations to your database have not run.
-Usually in development we run those migrations manually by calling `mix ecto.migrate`.
-For the release, we will have to configure it so that it can run the migrations on its own.
+Эта команда создаст для вас базу данных.
+После перезапуска приложения должно успешно запуститься.
+Однако, вы можете заметить, что миграции для базы данных не были запущены.
+Обычно в разработке мы запускаем все миграции вручную вызовом `mix ecto.migrate`.
+В случае релиза нам придется настроить его так, чтобы он запускал все миграции самостоятельно.
 
-
-## Running Migrations in Production
+## Запуск миграций в Production
 
 Distillery provides us with the ability to execute code at different points in a release's lifecycle.
 These points are known as [boot-hooks](https://hexdocs.pm/distillery/1.5.2/boot-hooks.html).
