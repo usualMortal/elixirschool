@@ -31,7 +31,7 @@
 ### Начало работы/установка
 
 Для того, чтобы добавить менеджер релизов Distillery в ваш проект, укажите его в качестве зависимости в файле `mix.exs`.
-*Примечание* - если вы работаете с зонтичным проектор, то это должен быть файл mix.exs в корневом каталоге вашего проекта.
+*Примечание* - если вы работаете с зонтичным проектом, то это должен быть файл mix.exs в корневом каталоге вашего проекта.
 
 ```elixir
 defp deps do
@@ -65,8 +65,9 @@ mix release.init
 ==> Assembling release..
 ==> Building release book_app:0.1.0 using environment dev
 ==> You have set dev_mode to true, skipping archival phase
-Release successfully built!
-To start the release you have built, you can use one of the following tasks:
+
+Релиз успешно собран!
+Чтобы запустить собранный релиз, используйте одну из следующих команд:
 
     # start a shell, like 'iex -S mix'
     > _build/dev/rel/book_app/bin/book_app console
@@ -142,9 +143,9 @@ MIX_ENV=prod mix ecto.create
 
 ## Запуск миграций в Production
 
-Distillery provides us with the ability to execute code at different points in a release's lifecycle.
-These points are known as [boot-hooks](https://hexdocs.pm/distillery/1.5.2/boot-hooks.html).
-The hooks provided by Distillery include
+Менеджер релизов Distillery предоставляет нам возможность исполнения заданного кода в разные моменты выполнения релиза.
+Эти разные моменты известны как [хуки запуска](https://hexdocs.pm/distillery/1.5.2/boot-hooks.html).
+Хуки запуска, предоставляемые Distillery, включают в себя:
 
 * pre_start
 * post_start
@@ -152,11 +153,10 @@ The hooks provided by Distillery include
 * pre/post_stop
 * pre/post_upgrade
 
-
-For our purposes, we're going to be using the `post_start` hook to run our apps migrations in production.
-Let's first go and create a new release task called `migrate`.
-A release task is a module function that we can call on from the terminal that contains code that is separate from the inner workings of our application.
-It is useful for tasks that the application itself will typically not need to run.
+Мы будем использовать хук `post_start` для запуска наших миграций в Production.
+Сначала создадим задачу релиза, названную `migrate`.
+Задача релиза это модульная функция, которую мы вызовем из терминала, и эта функция содержит код, который отделён от внутренней работы нашего приложения.
+Такой код полезен для задач, которые само приложение вряд ли будет запускать.
 
 ```elixir
 defmodule BookAppWeb.ReleaseTasks do
@@ -170,10 +170,10 @@ defmodule BookAppWeb.ReleaseTasks do
 end
 ```
 
-*Note* It is good practice to ensure that your applications have all started up properly before running these migrations.
-The [Ecto.Migrator](https://hexdocs.pm/ecto/2.2.8/Ecto.Migrator.html) allows us to run our migrations with the connected database.
+*Примечание* Неплохо будет убедиться, что ваши приложения запущены и корректно работают, перед тем, как запускать эти миграции.
+[Ecto.Migrator](https://hexdocs.pm/ecto/2.2.8/Ecto.Migrator.html) позволяет нам запустить наши миграции с подключенной базой данных.
 
-Далее, создадим новый файл - `rel/hooks/post_start/migrate.sh` и добавим следующий код:
+Далее, создадим новый файл - `rel/hooks/post_start/migrate.sh` - и добавим следующий код:
 
 
 ```bash
@@ -183,11 +183,11 @@ bin/book_app rpc "Elixir.BookApp.ReleaseTasks.migrate"
 
 ```
 
-In order for this code to run properly, we are using Erlang's `rpc` module which allows us Remote Procedure Call service.
-Basically, this allows us to call a function on a remote node and get the answer.
-When running in production it is likely that our application will be running in several different nodes
+Для того, чтобы этот код корректно отработал, мы используем модуль `rpc` языка Erlang, и этот модуль позволяет нам использовать удалённый вызов процедур (Remote Procedure Call).
+Это позволяет нам вызвать функцию на дистанционном узле и получить ответ.
+При работе в режиме Production наше приложение, скорее всего, будет выполняться на нескольких разных узлах.
+И, наконец, в файле `rel/config.exs` мы добавим хук для настройки нашего prod.
 
-Finally, in our `rel/config.exs` file we're going to add the hook to our prod configuration.
 
 Заменим
 
@@ -212,21 +212,21 @@ environment :prod do
 end
 ```
 
-*Примечание* - This hook only exists in the production release of this application.
-If we used the default development release it would not run.
+*Примечание* - этот хук доступен только для Producton релиза нашего приложения.
+При использовании релиза по умолчанию этот хук не запустится.
 
-## Custom Commands
+## Пользовательские команды
 
-When working with a release, you may not have access to `mix` commands as `mix` may not be installed to the machine the release is deployed to.
-We can solve this by creating custom commands.
+Иногда, работая с релизом, у вас может не быть доступа к `mix` командам, потому что модуль `mix` не установлен на той машине, куда был доставлен релиз.
+Эта проблема может быть решена введением пользовательских команд.
 
-> Custom commands are extensions to the boot script, and are used in the same way you use foreground or remote_console, in other words, they have the appearance of being part of the boot script. Like hooks, they have access to the boot scripts helper functions and environment - [Distillery Docs](https://hexdocs.pm/distillery/1.5.2/custom-commands.html)
+> Пользовательские команды это расширения загрузочного скрипта, и они используются так же, как вы бы использовали команды foreground или remote_console. То есть они выглядят как часть загрузочного скрипта. Подобно хукам, у них есть доступ к среде окружения и к вспомогательным функциям загрузочных скриптов - [Distillery Docs](https://hexdocs.pm/distillery/1.5.2/custom-commands.html).
 
-Commands are similar to release tasks in that they are both method functions but are different from them in that they are executed through the terminal as opposed to being run by the release script.
+Пользовательские команды похожи на задачи релиза в том смысле, что и те, и другие это функции, но они отличаются от задач релиза тем, что выполняются через терминал, в то время, как задачи релиза запускаются скриптом релиза.
 
-Now that we can run our migrations, we may want to be able to seed our database with information through running a command.
-First, add a new method to our release tasks.
-In `BookAppWeb.ReleaseTasks`, add the following:
+Теперь мы можем запустить наши миграции, и нам может потребоваться наполнить нашу базу данных информацией, переданной запуском команды.
+Для начала добавим новый метод в наши задачи релиза.
+В раздел `BookAppWeb.ReleaseTasks` добавим следующее:
 
 ```elixir
 def seed do
@@ -244,12 +244,11 @@ release_ctl eval "BookAppWeb.ReleaseTasks.seed/0"
 ```
 
 
-*Примечание* - `release_ctl()` is a shell script provided by Distillery that allows us to execute commands locally or in a clean node.
-If you need to run this against a running node you can run `release_remote_ctl()`
+*Примечание* - `release_ctl()` это шелл-скрипт, предоставляемый менеджер релизом Distillery, и он позволяет нам выполнять команды локально или в чистом узле. Если нам нужно выполнить команду в уже работающем узле, то можно запустить `release_remote_ctl()`.
 
-See more about shell_scripts from Distillery [here](https://hexdocs.pm/distillery/extensibility/shell_scripts.html)
+Больше о шелл-скриптах, предоставляемых Distillery, можно узнать [здесь](https://hexdocs.pm/distillery/extensibility/shell_scripts.html)
 
-Finally, add the following to your `rel/config.exs` file
+Наконец, добавим следующий код в файл `rel/config.exs`:
 ```elixir
 release :book_app do
   ...
@@ -260,5 +259,5 @@ end
 
 ```
 
-Be sure, to recreate the release by running `MIX_ENV=prod mix release`.
-Once this is complete, you can now run in your terminal `PORT=4001 _build/prod/rel/book_app/bin/book_app seed`.
+Не забудьте пересоздать релиз, запустив `MIX_ENV=prod mix release`.
+После отработки команды вы можете запустить в терминале `PORT=4001 _build/prod/rel/book_app/bin/book_app seed`.
